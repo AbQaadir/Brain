@@ -20,6 +20,7 @@ class PrepareBaseModelTrainingPipeline:
     
 if __name__ == '__main__':
     try:
+        logger.info(f"Prepare Base Model Pipeline started")
         logger.info(f"{STAGE_NAME} started.")
         obj = PrepareBaseModelTrainingPipeline()
         obj.main()
