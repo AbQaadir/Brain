@@ -1,13 +1,8 @@
-import dagshub
-import mlflow
 from KDC.config.configuration import ConfigurationManager
-from KDC.components.model_evaluation_mflow import Evaluation
+from KDC.components.model_evaluation_mlflow import Evaluation
 from KDC import logger
 
-
-
-STAGE_NAME = "Model Evaluation Step"
-
+STAGE_NAME = "Evaluation Step"
 
 class EvaluationPipeline:
     def __init__(self):
@@ -24,12 +19,16 @@ class EvaluationPipeline:
 
 if __name__ == '__main__':
     try:
-        logger.info('04 - Model Evaluation step')
+        import dagshub
+        dagshub.init(
+            repo_owner="AbQaadir", repo_name="Kidney-Disease-Classification", mlflow=True
+        )
+        logger.info("Evaluation Step started")
         logger.info(f"{STAGE_NAME} started.")
         obj = EvaluationPipeline()
         obj.main()
         logger.info(f"{STAGE_NAME} completed.")
-            
     except Exception as e:
         logger.exception(e)
         raise e
+            

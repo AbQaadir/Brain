@@ -1,9 +1,8 @@
 import os
 from KDC.constants import CONFIG_FILE_PATH, PARAMS_FILE_PATH
-from KDC.utils.common import read_yaml, create_directories
+from KDC.utils.common import read_yaml, create_directories, save_json
 from KDC.entity.config_entity import (DataIngestionConfig, PrepareBaseModelConfig, TrainingConfig, EvaluationConfig)
 from pathlib import Path
-
 
 
 class ConfigurationManager:
@@ -16,6 +15,7 @@ class ConfigurationManager:
 
         create_directories([self.config.artifacts_root])
 
+    # Data Ingestion Config
     def get_data_ingestion_config(self) -> DataIngestionConfig:
         config = self.config.data_ingestion
 
@@ -29,6 +29,7 @@ class ConfigurationManager:
         )
         return data_ingestion_config
     
+    # Prepare Base Model Config
     def get_prepare_base_model_config(self) -> PrepareBaseModelConfig:
         config = self.config.prepare_base_model
         
@@ -49,6 +50,7 @@ class ConfigurationManager:
 
         return prepare_base_model_config
     
+    # Training Config
     def get_training_config(self) -> TrainingConfig:
         training = self.config.training
         prepare_base_model = self.config.prepare_base_model
@@ -71,7 +73,7 @@ class ConfigurationManager:
 
         return training_config
     
-    
+    # Evaluation Config 
     def get_evaluation_config(self) -> EvaluationConfig:
         eval_config = EvaluationConfig(
             path_of_model="artifacts/training/model.h5",
@@ -79,7 +81,6 @@ class ConfigurationManager:
             mlflow_uri="https://dagshub.com/AbQaadir/Kidney-Disease-Classification.mlflow",
             all_params=self.params,
             params_image_size=self.params.IMAGE_SIZE,
-            params_batch_size=self.params.BATCH_SIZE
+            params_batch_size=self.params.BATCH_SIZE,
         )
         return eval_config
-    
