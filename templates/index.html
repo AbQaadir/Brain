@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>MLOPS</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', path='/style.css') }}">
+</head>
+<body>
+    <h1>Kidney Disease Classification</h1>
+    <form id="image-form" enctype="multipart/form-data">
+        <input type="file" id="image-input" name="file" accept="image/*">
+        <div class="image-container">
+            <img id="selected-image" src="" alt="Selected Image">
+        </div>
+        <button id="predict-button">Predict</button>
+    </form>
+
+    <script>
+        const imageInput = document.getElementById('image-input');
+        const selectedImage = document.getElementById('selected-image');
+        const predictButton = document.getElementById('predict-button');
+        const resultDiv = document.getElementById('result');
+
+        imageInput.addEventListener('change', (e) => {
+            const file = imageInput.files[0];
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                selectedImage.src = event.target.result;
+            };
+            reader.readAsDataURL(file);
+        });
+
+        predictButton.addEventListener('click', async (e) => {
+            e.preventDefault();
+            const file = imageInput.files[0];
+            const formData = new FormData();
+            formData.append('file', file);
+
+            try {
+                const response = await fetch('/predict', {
+                    method: 'POST',
+                    body: formData
+                });
+                const result = await response.json();
+                resultDiv.innerText = `Predicted class: ${result.result}`;
+            } catch (error) {
+                console.error(error);
+                resultDiv.innerText = 'Error: Unable to predict';
+            }
+        });
+    </script>
+</body>
+</html>
