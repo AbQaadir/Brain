@@ -1,55 +1,53 @@
-from fastapi import FastAPI, File, UploadFile, Request
-from fastapi.responses import HTMLResponse
-from fastapi.templating import Jinja2Templates
-from fastapi.staticfiles import StaticFiles
-from fastapi.middleware.cors import CORSMiddleware
+from flask import Flask, request, jsonify, render_template
 import os
+from flask_cors import CORS, cross_origin
 from KDC.utils.common import decodeImage
 from KDC.pipeline.prediction import PredictionPipeline
 
-app = FastAPI()
 
-app.mount("/static", StaticFiles(directory="static"), name="static")
 
-templates = Jinja2Templates(directory="templates")
+os.putenv('LANG', 'en_US.UTF-8')
+os.putenv('LC_ALL', 'en_US.UTF-8')
 
-origins = [
-    "http://localhost",
-    "http://localhost:8080",
-]
+app = Flask(__name__)
+CORS(app)
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=origins,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
 
 class ClientApp:
     def __init__(self):
         self.filename = "inputImage.jpg"
         self.classifier = PredictionPipeline(self.filename)
 
-clApp = ClientApp()
 
-@app.get("/")
-def home(request: Request):
-    return templates.TemplateResponse("index.html", {"request": request})
+@app.route("/", methods=['GET'])
+@cross_origin()
+def home():
+    return render_template('index.html')
 
-@app.post("/train")
-async def trainRoute():
-    # os.system("python main.py")
-    os.system("dvc repro")
-    return {"message": "Training done successfully!"}
 
-@app.post("/predict")
-async def predictRoute(file: UploadFile = File(...)):
-    image = await file.read()
+
+
+@app.route("/train", methods=['GET','POST'])
+@cross_origin()
+def trainRoute():
+    os.system("python main.py")
+    # os.system("dvc repro")
+    return "Training done successfully!"
+
+
+
+@app.route("/predict", methods=['POST'])
+@cross_origin()
+def predictRoute():
+    image = request.json['image']
     decodeImage(image, clApp.filename)
     result = clApp.classifier.predict()
-    return {"result": result}
+    return jsonify(result)
+
 
 if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8080)
+    clApp = ClientApp()
+
+    app.run(host='0.0.0.0', port=8080) #for AWS
+
+
